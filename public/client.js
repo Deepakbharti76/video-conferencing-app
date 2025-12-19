@@ -1,95 +1,124 @@
 // client.js
 const socket = io();
+
 const joinBtn = document.getElementById('joinBtn');
 const roomInput = document.getElementById('room');
 const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
 
+// Chat elements
+const chatBox = document.getElementById("chatBox");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+
 let localStream = null;
 let peerConnections = {}; // key: socketId, value: RTCPeerConnection
+
 const config = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' } // public STUN
-  ]
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
 };
 
+// -------------------- MEDIA --------------------
 async function startLocalStream() {
-  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+  localStream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true
+  });
   localVideo.srcObject = localStream;
 }
 
+// -------------------- JOIN ROOM --------------------
 joinBtn.onclick = async () => {
-  if (!localStream) await startLocalStream();
   const roomId = roomInput.value.trim();
-  if (!roomId) return alert('Enter room name');
+  if (!roomId) {
+    alert("Enter room name");
+    return;
+  }
+
+  if (!localStream) {
+    await startLocalStream();
+  }
 
   socket.emit('join-room', roomId);
   joinBtn.disabled = true;
 };
 
-// when another peer already in room notifies you
+// -------------------- SOCKET EVENTS --------------------
 socket.on('new-peer', async (peerId) => {
-  console.log('New peer in room:', peerId);
   await createOffer(peerId);
 });
 
-// when someone sends a signal (offer/answer/ice)
 socket.on('signal', async ({ from, data }) => {
   let pc = peerConnections[from];
-  if (!pc) {
-    pc = createPeerConnection(from);
-  }
+  if (!pc) pc = createPeerConnection(from);
 
   if (data.type === 'offer') {
     await pc.setRemoteDescription(new RTCSessionDescription(data));
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     socket.emit('signal', { to: from, data: pc.localDescription });
-  } else if (data.type === 'answer') {
+  } 
+  else if (data.type === 'answer') {
     await pc.setRemoteDescription(new RTCSessionDescription(data));
-  } else if (data.candidate) {
+  } 
+  else if (data.candidate) {
     try {
       await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
     } catch (e) {
-      console.warn('Error adding ICE candidate', e);
+      console.log(e);
     }
   }
 });
 
 socket.on('peer-disconnected', (peerId) => {
-  console.log('Peer disconnected:', peerId);
-  const pc = peerConnections[peerId];
-  if (pc) {
-    pc.close();
+  if (peerConnections[peerId]) {
+    peerConnections[peerId].close();
     delete peerConnections[peerId];
   }
   remoteVideo.srcObject = null;
 });
 
+// -------------------- CHAT --------------------
+sendBtn.onclick = () => {
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+
+  socket.emit("chat-message", msg);
+  addMessage("You", msg);
+  chatInput.value = "";
+};
+
+socket.on("chat-message", msg => {
+  addMessage("Peer", msg);
+});
+
+function addMessage(sender, message) {
+  const p = document.createElement("p");
+  p.innerHTML = `<b>${sender}:</b> ${message}`;
+  chatBox.appendChild(p);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// -------------------- WEBRTC HELPERS --------------------
 function createPeerConnection(peerId) {
   const pc = new RTCPeerConnection(config);
   peerConnections[peerId] = pc;
 
-  // add local tracks
-  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  localStream.getTracks().forEach(track => {
+    pc.addTrack(track, localStream);
+  });
 
   pc.onicecandidate = (event) => {
     if (event.candidate) {
-      socket.emit('signal', { to: peerId, data: { candidate: event.candidate } });
+      socket.emit('signal', {
+        to: peerId,
+        data: { candidate: event.candidate }
+      });
     }
   };
 
   pc.ontrack = (event) => {
-    // when remote stream arrives, show it (for simple demo we assume one remote stream)
     remoteVideo.srcObject = event.streams[0];
-  };
-
-  pc.onconnectionstatechange = () => {
-    console.log('Connection state:', pc.connectionState);
-    if (pc.connectionState === 'failed' || pc.connectionState === 'closed') {
-      pc.close();
-      delete peerConnections[peerId];
-    }
   };
 
   return pc;

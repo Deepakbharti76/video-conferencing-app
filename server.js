@@ -14,15 +14,22 @@ io.on('connection', socket => {
 
   socket.on('join-room', roomId => {
     socket.join(roomId);
-    const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
-    // notify others in room about new peer
-    socket.to(roomId).emit('new-peer', socket.id);
-    console.log(`${socket.id} joined ${roomId}. Clients in room:`, clients.length);
+    console.log(`${socket.id} joined room ${roomId}`);
 
+    // Notify others in the room
+    socket.to(roomId).emit('new-peer', socket.id);
+
+    // Signaling
     socket.on('signal', ({ to, data }) => {
       io.to(to).emit('signal', { from: socket.id, data });
     });
 
+    // Chat messages
+    socket.on('chat-message', message => {
+      socket.to(roomId).emit('chat-message', message);
+    });
+
+    // Disconnect
     socket.on('disconnect', () => {
       socket.to(roomId).emit('peer-disconnected', socket.id);
       console.log('Socket disconnected:', socket.id);
@@ -31,4 +38,6 @@ io.on('connection', socket => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
