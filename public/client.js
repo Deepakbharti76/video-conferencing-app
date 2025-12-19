@@ -1,10 +1,10 @@
 // client.js
 const socket = io();
 
-const joinBtn = document.getElementById('joinBtn');
-const roomInput = document.getElementById('room');
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
+const joinBtn = document.getElementById("joinBtn");
+const roomInput = document.getElementById("room");
+const localVideo = document.getElementById("localVideo");
+const remoteVideo = document.getElementById("remoteVideo");
 
 // Chat elements
 const chatBox = document.getElementById("chatBox");
@@ -15,14 +15,14 @@ let localStream = null;
 let peerConnections = {}; // key: socketId, value: RTCPeerConnection
 
 const config = {
-  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
 // -------------------- MEDIA --------------------
 async function startLocalStream() {
   localStream = await navigator.mediaDevices.getUserMedia({
     video: true,
-    audio: true
+    audio: true,
   });
   localVideo.srcObject = localStream;
 }
@@ -39,29 +39,27 @@ joinBtn.onclick = async () => {
     await startLocalStream();
   }
 
-  socket.emit('join-room', roomId);
+  socket.emit("join-room", roomId);
   joinBtn.disabled = true;
 };
 
 // -------------------- SOCKET EVENTS --------------------
-socket.on('new-peer', async (peerId) => {
+socket.on("new-peer", async (peerId) => {
   await createOffer(peerId);
 });
 
-socket.on('signal', async ({ from, data }) => {
+socket.on("signal", async ({ from, data }) => {
   let pc = peerConnections[from];
   if (!pc) pc = createPeerConnection(from);
 
-  if (data.type === 'offer') {
+  if (data.type === "offer") {
     await pc.setRemoteDescription(new RTCSessionDescription(data));
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    socket.emit('signal', { to: from, data: pc.localDescription });
-  } 
-  else if (data.type === 'answer') {
+    socket.emit("signal", { to: from, data: pc.localDescription });
+  } else if (data.type === "answer") {
     await pc.setRemoteDescription(new RTCSessionDescription(data));
-  } 
-  else if (data.candidate) {
+  } else if (data.candidate) {
     try {
       await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
     } catch (e) {
@@ -70,7 +68,7 @@ socket.on('signal', async ({ from, data }) => {
   }
 });
 
-socket.on('peer-disconnected', (peerId) => {
+socket.on("peer-disconnected", (peerId) => {
   if (peerConnections[peerId]) {
     peerConnections[peerId].close();
     delete peerConnections[peerId];
@@ -88,7 +86,7 @@ sendBtn.onclick = () => {
   chatInput.value = "";
 };
 
-socket.on("chat-message", msg => {
+socket.on("chat-message", (msg) => {
   addMessage("Peer", msg);
 });
 
@@ -104,15 +102,15 @@ function createPeerConnection(peerId) {
   const pc = new RTCPeerConnection(config);
   peerConnections[peerId] = pc;
 
-  localStream.getTracks().forEach(track => {
+  localStream.getTracks().forEach((track) => {
     pc.addTrack(track, localStream);
   });
 
   pc.onicecandidate = (event) => {
     if (event.candidate) {
-      socket.emit('signal', {
+      socket.emit("signal", {
         to: peerId,
-        data: { candidate: event.candidate }
+        data: { candidate: event.candidate },
       });
     }
   };
@@ -128,5 +126,46 @@ async function createOffer(peerId) {
   const pc = createPeerConnection(peerId);
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
-  socket.emit('signal', { to: peerId, data: pc.localDescription });
+  socket.emit("signal", { to: peerId, data: pc.localDescription });
 }
+
+// -------------------- SCREEN SHARE --------------------
+const shareScreenBtn = document.getElementById("shareScreenBtn");
+let screenStream = null;
+
+shareScreenBtn.onclick = async () => {
+  try {
+    // Screen capture
+    screenStream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+    });
+
+    const screenTrack = screenStream.getVideoTracks()[0];
+
+    // Replace video track for all peers
+    Object.values(peerConnections).forEach((pc) => {
+      const sender = pc
+        .getSenders()
+        .find((s) => s.track && s.track.kind === "video");
+      if (sender) {
+        sender.replaceTrack(screenTrack);
+      }
+    });
+
+    // When screen sharing stops, switch back to camera
+    screenTrack.onended = () => {
+      const cameraTrack = localStream.getVideoTracks()[0];
+      Object.values(peerConnections).forEach((pc) => {
+        const sender = pc
+          .getSenders()
+          .find((s) => s.track && s.track.kind === "video");
+        if (sender) {
+          sender.replaceTrack(cameraTrack);
+        }
+      });
+    };
+  } catch (err) {
+    console.error("Screen share error:", err);
+    alert("Screen sharing failed");
+  }
+};
