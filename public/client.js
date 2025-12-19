@@ -130,42 +130,38 @@ async function createOffer(peerId) {
 }
 
 // -------------------- SCREEN SHARE --------------------
-const shareScreenBtn = document.getElementById("shareScreenBtn");
-let screenStream = null;
 
 shareScreenBtn.onclick = async () => {
+  if (Object.keys(peerConnections).length === 0) {
+    alert("No peer connected. Join from another device first.");
+    return;
+  }
+
   try {
-    // Screen capture
-    screenStream = await navigator.mediaDevices.getDisplayMedia({
+    const screenStream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
     });
 
     const screenTrack = screenStream.getVideoTracks()[0];
 
-    // Replace video track for all peers
     Object.values(peerConnections).forEach((pc) => {
       const sender = pc
         .getSenders()
         .find((s) => s.track && s.track.kind === "video");
-      if (sender) {
-        sender.replaceTrack(screenTrack);
-      }
+      if (sender) sender.replaceTrack(screenTrack);
     });
 
-    // When screen sharing stops, switch back to camera
     screenTrack.onended = () => {
       const cameraTrack = localStream.getVideoTracks()[0];
       Object.values(peerConnections).forEach((pc) => {
         const sender = pc
           .getSenders()
           .find((s) => s.track && s.track.kind === "video");
-        if (sender) {
-          sender.replaceTrack(cameraTrack);
-        }
+        if (sender) sender.replaceTrack(cameraTrack);
       });
     };
   } catch (err) {
-    console.error("Screen share error:", err);
-    alert("Screen sharing failed");
+    console.error(err);
+    alert("Screen share failed: permission or browser issue");
   }
 };
