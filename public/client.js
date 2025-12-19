@@ -209,3 +209,38 @@ endCallBtn.onclick = () => {
   alert("Call ended");
   location.reload();
 };
+
+
+// -------------------- ACTIVE SPEAKER --------------------
+let audioContext;
+let analyser;
+let micSource;
+let rafId;
+
+function startActiveSpeakerDetection() {
+  if (!localStream) return;
+
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 512;
+
+  micSource = audioContext.createMediaStreamSource(localStream);
+  micSource.connect(analyser);
+
+  const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+  const checkVolume = () => {
+    analyser.getByteFrequencyData(dataArray);
+    const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+
+    if (volume > 25) {
+      localVideo.classList.add("active-speaker");
+    } else {
+      localVideo.classList.remove("active-speaker");
+    }
+
+    rafId = requestAnimationFrame(checkVolume);
+  };
+
+  checkVolume();
+}
