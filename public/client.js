@@ -165,3 +165,53 @@ shareScreenBtn.onclick = async () => {
     alert("Screen share failed: permission or browser issue");
   }
 };
+
+// MUTE / UNMUTE
+
+const muteBtn = document.getElementById("muteBtn");
+let isMuted = false;
+
+muteBtn.onclick = () => {
+  if (!localStream) {
+    alert("Call not started");
+    return;
+  }
+
+  const audioTrack = localStream.getAudioTracks()[0];
+  if (!audioTrack) return;
+
+  isMuted = !isMuted;
+  audioTrack.enabled = !isMuted;
+
+  muteBtn.innerText = isMuted ? "Unmute" : "Mute";
+};
+
+// ❌ END CALL
+
+const endCallBtn = document.getElementById("endCallBtn");
+
+endCallBtn.onclick = () => {
+  // Close all peer connections
+  Object.values(peerConnections).forEach((pc) => {
+    pc.close();
+  });
+  peerConnections = {};
+
+  // Stop media tracks
+  if (localStream) {
+    localStream.getTracks().forEach((track) => track.stop());
+    localStream = null;
+  }
+
+  // Reset videos
+  localVideo.srcObject = null;
+  remoteVideo.srcObject = null;
+
+  // Disconnect socket
+  socket.disconnect();
+
+  alert("Call Ended");
+
+  // Reload page (simple & safe)
+  location.reload();
+};
