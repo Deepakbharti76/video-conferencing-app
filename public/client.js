@@ -20,9 +20,16 @@ const shareScreenBtn = document.getElementById("shareScreenBtn");
 const muteBtn = document.getElementById("muteBtn");
 const endCallBtn = document.getElementById("endCallBtn");
 
+// 👉 NEW buttons (HTML me hone chahiye)
+const cameraBtn = document.getElementById("cameraBtn");
+const clearChatBtn = document.getElementById("clearChatBtn");
+const copyRoomBtn = document.getElementById("copyRoomBtn");
+const countEl = document.getElementById("count");
+
 let localStream = null;
 let peerConnections = {};
 let isMuted = false;
+let cameraOff = false;
 
 const config = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -64,6 +71,11 @@ socket.on("join-success", async () => {
 
 socket.on("join-error", (msg) => {
   alert(msg);
+});
+
+// participants count
+socket.on("participants", (c) => {
+  if (countEl) countEl.innerText = "Participants: " + c;
 });
 
 // new peer
@@ -113,6 +125,11 @@ sendBtn.onclick = () => {
   chatInput.value = "";
 };
 
+// Enter key support
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendBtn.click();
+});
+
 socket.on("chat-message", ({ sender, message }) => {
   addMessage(sender, message);
 });
@@ -122,6 +139,13 @@ function addMessage(sender, msg) {
   p.innerHTML = `<b>${sender}:</b> ${msg}`;
   chatBox.appendChild(p);
   chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Clear chat
+if (clearChatBtn) {
+  clearChatBtn.onclick = () => {
+    chatBox.innerHTML = "";
+  };
 }
 
 // ---------------- WEBRTC ----------------
@@ -181,13 +205,31 @@ shareScreenBtn.onclick = async () => {
   };
 };
 
+// ---------------- CAMERA ON / OFF ----------------
+if (cameraBtn) {
+  cameraBtn.onclick = () => {
+    const track = localStream.getVideoTracks()[0];
+    cameraOff = !cameraOff;
+    track.enabled = !cameraOff;
+    cameraBtn.innerText = cameraOff ? "Camera On" : "Camera Off";
+  };
+}
+
 // ---------------- MUTE ----------------
 muteBtn.onclick = () => {
   const track = localStream.getAudioTracks()[0];
   isMuted = !isMuted;
   track.enabled = !isMuted;
-  muteBtn.innerText = isMuted ? "Unmute" : "Mute";
+  muteBtn.innerText = isMuted ? "Mic Off" : "Mic On";
 };
+
+// ---------------- COPY ROOM ID ----------------
+if (copyRoomBtn) {
+  copyRoomBtn.onclick = () => {
+    navigator.clipboard.writeText(currentRoom);
+    alert("Room ID copied");
+  };
+}
 
 // ---------------- END CALL ----------------
 endCallBtn.onclick = () => {

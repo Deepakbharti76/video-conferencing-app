@@ -1,5 +1,6 @@
 const ROOM_PASSWORD = "7644";
 const users = {};
+const roomCounts = {}; // 👈 participants count
 
 const express = require("express");
 const http = require("http");
@@ -14,51 +15,66 @@ app.use(express.static("public"));
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
 
+  // ---------------- JOIN ROOM ----------------
   socket.on("join-room", ({ roomId, password, username }) => {
-    // 🔐 Password check
     if (password !== ROOM_PASSWORD) {
       socket.emit("join-error", "Wrong password");
       return;
     }
 
-    // store user
     users[socket.id] = username;
+    socket.roomId = roomId;
 
     socket.join(roomId);
     socket.emit("join-success");
 
-    // notify others
+    // participants count
+    roomCounts[roomId] = (roomCounts[roomId] || 0) + 1;
+    io.to(roomId).emit("participants", roomCounts[roomId]);
+
+    // system join message
+    socket.to(roomId).emit("chat-message", {
+      sender: "System",
+      message: `${username} joined the room`,
+    });
+
+    // new peer
     socket.to(roomId).emit("new-peer", {
       id: socket.id,
       name: username,
     });
+  });
 
-    // signaling
-    socket.on("signal", ({ to, data }) => {
-      io.to(to).emit("signal", {
-        from: socket.id,
-        data,
-      });
-    });
+  // ---------------- CHAT (ONLY ONCE) ----------------
+  socket.on("chat-message", ({ roomId, sender, message }) => {
+    socket.to(roomId).emit("chat-message", { sender, message });
+  });
 
-    // 💬 chat
-    socket.on("chat-message", ({ roomId, sender, message }) => {
+  // ---------------- SIGNALING ----------------
+  socket.on("signal", ({ to, data }) => {
+    io.to(to).emit("signal", { from: socket.id, data });
+  });
+
+  // ---------------- DISCONNECT ----------------
+  socket.on("disconnect", () => {
+    const roomId = socket.roomId;
+    if (roomId) {
+      // participants count update
+      roomCounts[roomId]--;
+      io.to(roomId).emit("participants", roomCounts[roomId]);
+
+      // system leave message
       socket.to(roomId).emit("chat-message", {
-        sender,
-        message,
+        sender: "System",
+        message: `${users[socket.id]} left the room`,
       });
-    });
 
-    // ❌ disconnect
-    socket.on("disconnect", () => {
-      delete users[socket.id];
       socket.to(roomId).emit("peer-disconnected", socket.id);
-      console.log("Disconnected:", socket.id);
-    });
+    }
+    delete users[socket.id];
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
+server.listen(process.env.PORT || 3000, () =>
+  console.log("Server running")
 );
