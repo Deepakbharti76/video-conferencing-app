@@ -1,45 +1,51 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Simple WebRTC App</title>
-   <link rel="stylesheet" href="style.css">
-  <style>
-    body { font-family: Arial, sans-serif; padding: 12px; }
-    video { width: 45%; margin: 5px; border: 1px solid #ddd; }
-    #controls { margin-bottom: 10px; }
-  </style>
-</head>
-<body>
-  <h2>Video Conferencing Demo</h2>
-  <div id="controls">
-    Room: <input id="room" value="demo-room" />
-    <button id="joinBtn">Join Room</button>
-  </div>
+  <head>
+    <meta charset="utf-8" />
+    <title>Video Conferencing App</title>
 
-    <hr>
+    <!-- External CSS only -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<hr>
+  <body>
+    <div class="container">
+      <h2>Video Conferencing App</h2>
 
+      <!-- Join Section -->
+      <div class="join-box">
+        <input id="room" value="demo-room" placeholder="Room name" />
+        <input id="roomPassword" placeholder="Room password" />
+        <input id="username" placeholder="Your name">
+        <button id="joinBtn">Join Room</button>
+      </div>
 
-<h3>Live Chat</h3>
-<div id="chatBox" style="height:150px; border:1px solid #ccc; overflow-y:auto; padding:5px;"></div>
+      <!-- Videos (GROUP CALL READY) -->
+      <div class="video-container" id="videoContainer">
+        <video id="localVideo" autoplay muted playsinline></video>
+      </div>
 
-<input type="text" id="chatInput" placeholder="Type message..." />
-<button id="sendBtn">Send</button>
+      <!-- Controls -->
+      <div class="controls">
+        <button id="shareScreenBtn">Share Screen</button>
+        <button id="muteBtn">Mute</button>
+        <button id="endCallBtn">End Call</button>
+      </div>
 
-<br><br>
+      <!-- Chat -->
+      <div class="chat-box">
+        <h3>Live Chat</h3>
+        <div id="chatBox"></div>
 
-<button id="shareScreenBtn">Share Screen</button>
-<button id="muteBtn">Mute</button>
-<button id="endCallBtn">End Call</button>
+        <div class="chat-input">
+          <input id="chatInput" placeholder="Type message..." />
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+    </div>
 
-
-
-  <video id="localVideo" autoplay playsinline muted></video>
-  <video id="remoteVideo" autoplay playsinline></video>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="client.js"></script>
-</body>
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+  </body>
 </html>

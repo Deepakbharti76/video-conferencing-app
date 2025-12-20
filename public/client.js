@@ -1,24 +1,34 @@
 // client.js
+let currentRoom = null;
+let myName = "Guest";
+
 const socket = io();
 
 const joinBtn = document.getElementById("joinBtn");
 const roomInput = document.getElementById("room");
-const localVideo = document.getElementById("localVideo");
-const remoteVideo = document.getElementById("remoteVideo");
+const passwordInput = document.getElementById("roomPassword");
+const usernameInput = document.getElementById("username");
 
-// Chat elements
+const localVideo = document.getElementById("localVideo");
+const videoContainer = document.getElementById("videoContainer");
+
 const chatBox = document.getElementById("chatBox");
 const chatInput = document.getElementById("chatInput");
 const sendBtn = document.getElementById("sendBtn");
 
+const shareScreenBtn = document.getElementById("shareScreenBtn");
+const muteBtn = document.getElementById("muteBtn");
+const endCallBtn = document.getElementById("endCallBtn");
+
 let localStream = null;
-let peerConnections = {}; // key: socketId, value: RTCPeerConnection
+let peerConnections = {};
+let isMuted = false;
 
 const config = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
-// -------------------- MEDIA --------------------
+// ---------------- MEDIA ----------------
 async function startLocalStream() {
   localStream = await navigator.mediaDevices.getUserMedia({
     video: true,
@@ -27,96 +37,119 @@ async function startLocalStream() {
   localVideo.srcObject = localStream;
 }
 
-// -------------------- JOIN ROOM --------------------
-joinBtn.onclick = async () => {
+// ---------------- JOIN ----------------
+joinBtn.onclick = () => {
   const roomId = roomInput.value.trim();
-  if (!roomId) {
-    alert("Enter room name");
+  const password = passwordInput.value;
+  const username = usernameInput.value || "Guest";
+
+  if (!roomId || !password) {
+    alert("Room name & password required");
     return;
   }
 
-  if (!localStream) {
-    await startLocalStream();
-  }
+  currentRoom = roomId;
+  myName = username;
 
-  socket.emit("join-room", roomId);
-  joinBtn.disabled = true;
+  socket.emit("join-room", { roomId, password, username });
 };
 
-// -------------------- SOCKET EVENTS --------------------
-socket.on("new-peer", async (peerId) => {
-  await createOffer(peerId);
+// ---------------- SOCKET EVENTS ----------------
+socket.on("join-success", async () => {
+  if (!localStream) {
+    await startLocalStream();
+    startActiveSpeakerDetection();
+  }
 });
 
+socket.on("join-error", (msg) => {
+  alert(msg);
+});
+
+// new peer
+socket.on("new-peer", ({ id }) => {
+  createOffer(id);
+});
+
+// signaling
 socket.on("signal", async ({ from, data }) => {
   let pc = peerConnections[from];
   if (!pc) pc = createPeerConnection(from);
 
   if (data.type === "offer") {
-    await pc.setRemoteDescription(new RTCSessionDescription(data));
+    await pc.setRemoteDescription(data);
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     socket.emit("signal", { to: from, data: pc.localDescription });
   } else if (data.type === "answer") {
-    await pc.setRemoteDescription(new RTCSessionDescription(data));
+    await pc.setRemoteDescription(data);
   } else if (data.candidate) {
-    try {
-      await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-    } catch (e) {
-      console.log(e);
-    }
+    await pc.addIceCandidate(data.candidate);
   }
 });
 
+// peer disconnected
 socket.on("peer-disconnected", (peerId) => {
   if (peerConnections[peerId]) {
     peerConnections[peerId].close();
     delete peerConnections[peerId];
   }
-  remoteVideo.srcObject = null;
+  const video = document.getElementById(`video-${peerId}`);
+  if (video) video.remove();
 });
 
-// -------------------- CHAT --------------------
+// ---------------- CHAT ----------------
 sendBtn.onclick = () => {
   const msg = chatInput.value.trim();
-  if (!msg) return;
+  if (!msg || !currentRoom) return;
 
-  socket.emit("chat-message", msg);
+  socket.emit("chat-message", {
+    roomId: currentRoom,
+    sender: myName,
+    message: msg,
+  });
+
   addMessage("You", msg);
   chatInput.value = "";
 };
 
-socket.on("chat-message", (msg) => {
-  addMessage("Peer", msg);
+socket.on("chat-message", ({ sender, message }) => {
+  addMessage(sender, message);
 });
 
-function addMessage(sender, message) {
+function addMessage(sender, msg) {
   const p = document.createElement("p");
-  p.innerHTML = `<b>${sender}:</b> ${message}`;
+  p.innerHTML = `<b>${sender}:</b> ${msg}`;
   chatBox.appendChild(p);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// -------------------- WEBRTC HELPERS --------------------
+// ---------------- WEBRTC ----------------
 function createPeerConnection(peerId) {
   const pc = new RTCPeerConnection(config);
   peerConnections[peerId] = pc;
 
-  localStream.getTracks().forEach((track) => {
-    pc.addTrack(track, localStream);
-  });
+  localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
 
-  pc.onicecandidate = (event) => {
-    if (event.candidate) {
-      socket.emit("signal", {
-        to: peerId,
-        data: { candidate: event.candidate },
-      });
+  pc.ontrack = (e) => {
+    let video = document.getElementById(`video-${peerId}`);
+    if (!video) {
+      video = document.createElement("video");
+      video.id = `video-${peerId}`;
+      video.autoplay = true;
+      video.playsInline = true;
+      videoContainer.appendChild(video);
     }
+    video.srcObject = e.streams[0];
   };
 
-  pc.ontrack = (event) => {
-    remoteVideo.srcObject = event.streams[0];
+  pc.onicecandidate = (e) => {
+    if (e.candidate) {
+      socket.emit("signal", {
+        to: peerId,
+        data: { candidate: e.candidate },
+      });
+    }
   };
 
   return pc;
@@ -129,118 +162,55 @@ async function createOffer(peerId) {
   socket.emit("signal", { to: peerId, data: pc.localDescription });
 }
 
-// -------------------- SCREEN SHARE --------------------
-
+// ---------------- SCREEN SHARE ----------------
 shareScreenBtn.onclick = async () => {
-  if (Object.keys(peerConnections).length === 0) {
-    alert("No peer connected. Join from another device first.");
-    return;
-  }
+  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+  const track = stream.getVideoTracks()[0];
 
-  try {
-    const screenStream = await navigator.mediaDevices.getDisplayMedia({
-      video: true,
-    });
+  Object.values(peerConnections).forEach((pc) => {
+    const sender = pc.getSenders().find((s) => s.track.kind === "video");
+    sender.replaceTrack(track);
+  });
 
-    const screenTrack = screenStream.getVideoTracks()[0];
-
+  track.onended = () => {
+    const camTrack = localStream.getVideoTracks()[0];
     Object.values(peerConnections).forEach((pc) => {
-      const sender = pc
-        .getSenders()
-        .find((s) => s.track && s.track.kind === "video");
-      if (sender) sender.replaceTrack(screenTrack);
+      const sender = pc.getSenders().find((s) => s.track.kind === "video");
+      sender.replaceTrack(camTrack);
     });
-
-    screenTrack.onended = () => {
-      const cameraTrack = localStream.getVideoTracks()[0];
-      Object.values(peerConnections).forEach((pc) => {
-        const sender = pc
-          .getSenders()
-          .find((s) => s.track && s.track.kind === "video");
-        if (sender) sender.replaceTrack(cameraTrack);
-      });
-    };
-  } catch (err) {
-    console.error(err);
-    alert("Screen share failed: permission or browser issue");
-  }
+  };
 };
 
-// MUTE / UNMUTE
-console.log("Mute button:", muteBtn);
-
-
-const muteBtn = document.getElementById("muteBtn");
-let isMuted = false;
-
+// ---------------- MUTE ----------------
 muteBtn.onclick = () => {
-  if (!localStream) {
-    alert("Join the call first");
-    return;
-  }
-
-  const audioTrack = localStream.getAudioTracks()[0];
+  const track = localStream.getAudioTracks()[0];
   isMuted = !isMuted;
-  audioTrack.enabled = !isMuted;
-
+  track.enabled = !isMuted;
   muteBtn.innerText = isMuted ? "Unmute" : "Mute";
 };
 
-
-
-
-
-// ❌ END CALL
-
-console.log("EndCall button:", endCallBtn);
-
-const endCallBtn = document.getElementById("endCallBtn");
-
+// ---------------- END CALL ----------------
 endCallBtn.onclick = () => {
-  Object.values(peerConnections).forEach(pc => pc.close());
-  peerConnections = {};
-
-  if (localStream) {
-    localStream.getTracks().forEach(t => t.stop());
-    localStream = null;
-  }
-
+  Object.values(peerConnections).forEach((pc) => pc.close());
   socket.disconnect();
-  alert("Call ended");
   location.reload();
 };
 
-
-// -------------------- ACTIVE SPEAKER --------------------
-let audioContext;
-let analyser;
-let micSource;
-let rafId;
-
+// ---------------- ACTIVE SPEAKER ----------------
 function startActiveSpeakerDetection() {
-  if (!localStream) return;
+  const ctx = new AudioContext();
+  const analyser = ctx.createAnalyser();
+  const src = ctx.createMediaStreamSource(localStream);
+  src.connect(analyser);
 
-  audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioContext.createAnalyser();
-  analyser.fftSize = 512;
+  const data = new Uint8Array(analyser.frequencyBinCount);
 
-  micSource = audioContext.createMediaStreamSource(localStream);
-  micSource.connect(analyser);
-
-  const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
-  const checkVolume = () => {
-    analyser.getByteFrequencyData(dataArray);
-    const volume = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-
-    if (volume > 25) {
-      localVideo.classList.add("active-speaker");
-    } else {
-      localVideo.classList.remove("active-speaker");
-    }
-
-    rafId = requestAnimationFrame(checkVolume);
+  const detect = () => {
+    analyser.getByteFrequencyData(data);
+    const vol = data.reduce((a, b) => a + b) / data.length;
+    localVideo.classList.toggle("active-speaker", vol > 25);
+    requestAnimationFrame(detect);
   };
 
-  checkVolume();
+  detect();
 }
