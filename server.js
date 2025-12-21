@@ -1,6 +1,8 @@
 const ROOM_PASSWORD = "7644";
-const users = {};
-const roomCounts = {}; // 👈 participants count
+
+const users = {}; // socket.id -> username
+const roomCounts = {}; // roomId -> count
+const feedbacks = []; // store feedbacks (memory)
 
 const express = require("express");
 const http = require("http");
@@ -22,6 +24,9 @@ io.on("connection", (socket) => {
       return;
     }
 
+    // prevent duplicate join
+    if (socket.roomId) return;
+
     users[socket.id] = username;
     socket.roomId = roomId;
 
@@ -38,14 +43,14 @@ io.on("connection", (socket) => {
       message: `${username} joined the room`,
     });
 
-    // new peer
+    // new peer notify
     socket.to(roomId).emit("new-peer", {
       id: socket.id,
       name: username,
     });
   });
 
-  // ---------------- CHAT (ONLY ONCE) ----------------
+  // ---------------- CHAT ----------------
   socket.on("chat-message", ({ roomId, sender, message }) => {
     socket.to(roomId).emit("chat-message", { sender, message });
   });
@@ -55,26 +60,44 @@ io.on("connection", (socket) => {
     io.to(to).emit("signal", { from: socket.id, data });
   });
 
+  // ---------------- FEEDBACK ----------------
+  socket.on("send-feedback", ({ roomId, user, feedback }) => {
+    const entry = {
+      roomId,
+      user,
+      feedback,
+      time: new Date().toISOString(),
+    };
+
+    feedbacks.push(entry);
+    console.log("📩 Feedback:", entry);
+
+    // optional system message
+    socket.to(roomId).emit("chat-message", {
+      sender: "System",
+      message: `${user} submitted feedback`,
+    });
+  });
+
   // ---------------- DISCONNECT ----------------
   socket.on("disconnect", () => {
     const roomId = socket.roomId;
+    const username = users[socket.id];
+
     if (roomId) {
-      // participants count update
-      roomCounts[roomId]--;
+      roomCounts[roomId] = Math.max((roomCounts[roomId] || 1) - 1, 0);
       io.to(roomId).emit("participants", roomCounts[roomId]);
 
-      // system leave message
       socket.to(roomId).emit("chat-message", {
         sender: "System",
-        message: `${users[socket.id]} left the room`,
+        message: `${username} left the room`,
       });
 
       socket.to(roomId).emit("peer-disconnected", socket.id);
     }
+
     delete users[socket.id];
   });
 });
 
-server.listen(process.env.PORT || 3000, () =>
-  console.log("Server running")
-);
+server.listen(process.env.PORT || 3000, () => console.log("Server running"));

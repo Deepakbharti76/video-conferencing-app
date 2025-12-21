@@ -174,12 +174,11 @@ button:active {
   }
 }
 
-
 /* ================= VIDEO PLACEHOLDER FIX ================= */
 
 .video-container video {
   width: 100%;
-  aspect-ratio: 16 / 9;   /* 🔥 rectangle issue solve */
+  aspect-ratio: 16 / 9; /* 🔥 rectangle issue solve */
   height: auto;
   object-fit: cover;
   border-radius: 16px;
@@ -194,4 +193,88 @@ video:not([srcObject]) {
 /* Icon ko visually better dikhane ke liye */
 video {
   display: block;
+}
+
+/* ================= FEEDBACK SECTION ================= */
+
+.chat-box textarea {
+  width: 100%;
+  resize: none;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-family: Arial, sans-serif;
+}
+
+.chat-box button#sendFeedbackBtn {
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #22c55e;
+  color: #000;
+  font-weight: bold;
+}
+
+.chat-box button#sendFeedbackBtn:hover {
+  background: #16a34a;
+  color: #fff;
+}
+
+/* ================= SYSTEM MESSAGE LOOK ================= */
+
+#chatBox p {
+  margin: 4px 0;
+}
+
+#chatBox p b {
+  color: #22c55e;
+}
+
+/* ================= BUTTON COLOR VARIANTS ================= */
+
+#endCallBtn {
+  background: #ef4444;
+  color: white;
+}
+
+#endCallBtn:hover {
+  background: #dc2626;
+}
+
+#muteBtn,
+#cameraBtn,
+#shareScreenBtn {
+  background: #e5e7eb;
+  color: #000;
+}
+
+#muteBtn:hover,
+#cameraBtn:hover,
+#shareScreenBtn:hover {
+  background: #d1d5db;
+}
+
+/* ================= JOIN BOX BUTTONS ================= */
+
+#joinBtn {
+  background: #22c55e;
+  color: #000;
+  font-weight: bold;
+}
+
+#joinBtn:hover {
+  background: #16a34a;
+  color: #fff;
+}
+
+#copyRoomBtn {
+  background: #3b82f6;
+  color: #fff;
+}
+
+#copyRoomBtn:hover {
+  background: #2563eb;
 }

@@ -256,3 +256,32 @@ function startActiveSpeakerDetection() {
 
   detect();
 }
+
+// ================= FEEDBACK =================
+
+// HTML me ye elements hone chahiye:
+// <textarea id="feedbackText"></textarea>
+// <button id="sendFeedbackBtn">Send Feedback</button>
+
+const feedbackText = document.getElementById("feedbackText");
+const sendFeedbackBtn = document.getElementById("sendFeedbackBtn");
+
+if (sendFeedbackBtn) {
+  sendFeedbackBtn.onclick = () => {
+    const feedback = feedbackText.value.trim();
+
+    if (!feedback) {
+      alert("Please write feedback");
+      return;
+    }
+
+    socket.emit("send-feedback", {
+      roomId: currentRoom,
+      user: myName,
+      feedback,
+    });
+
+    feedbackText.value = "";
+    alert("Thanks for your feedback 🙏");
+  };
+}
