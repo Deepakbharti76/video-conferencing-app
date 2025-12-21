@@ -285,3 +285,12 @@ if (sendFeedbackBtn) {
     alert("Thanks for your feedback 🙏");
   };
 }
+
+
+// ================= MOBILE CHECK =================
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if (isMobile && shareScreenBtn) {
+  shareScreenBtn.disabled = true;
+  shareScreenBtn.innerText = "Screen Share (PC only)";
+}
