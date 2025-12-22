@@ -1,4 +1,4 @@
-/* ================= BASE BODY (your existing backgrounds kept) ================= */
+/* ================= BASE BODY ================= */
 
 body {
   margin: 0;
@@ -70,13 +70,30 @@ h2 {
   margin-top: 10px;
 }
 
+/* ✅ ALL VIDEOS BASE STYLE */
 .video-container video {
   width: 100%;
-  height: 220px;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
-  border-radius: 10px;
-  background: black;
+  border-radius: 16px;
+  background: #000;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  display: block;
+}
+
+/* ✅ FRONT CAMERA MIRROR (ONLY LOCAL PREVIEW) */
+#localVideo {
+  transform: scaleX(-1);
+}
+
+/* ❌ REMOTE VIDEOS MUST NOT MIRROR */
+.video-container video:not(#localVideo) {
+  transform: none;
+}
+
+/* ✅ CAMERA OFF / NO STREAM PLACEHOLDER */
+video:not([srcObject]) {
+  background-color: #000;
 }
 
 /* ================= CONTROLS ================= */
@@ -116,12 +133,14 @@ h2 {
   gap: 6px;
 }
 
-.chat-input input {
+.chat-input input,
+.chat-box textarea {
   flex: 1;
   padding: 8px;
   border-radius: 6px;
   border: none;
   outline: none;
+  font-family: Arial, sans-serif;
 }
 
 .chat-input button {
@@ -133,11 +152,15 @@ h2 {
 
 /* ================= SYSTEM MESSAGE ================= */
 
+#chatBox p {
+  margin: 4px 0;
+}
+
 #chatBox p b {
   color: #22c55e;
 }
 
-/* ================= BUTTON ANIMATION (your existing kept) ================= */
+/* ================= BUTTON ANIMATION ================= */
 
 button {
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
@@ -161,103 +184,7 @@ button:active {
   box-shadow: 0 0 25px rgba(34, 197, 94, 0.7);
 }
 
-/* ================= MOBILE RESPONSIVE ================= */
-
-@media (max-width: 600px) {
-  .video-container video {
-    height: 180px;
-  }
-
-  .controls button {
-    padding: 8px 10px;
-    font-size: 14px;
-  }
-}
-
-/* ================= VIDEO PLACEHOLDER FIX ================= */
-
-.video-container video {
-  width: 100%;
-  aspect-ratio: 16 / 9; /* 🔥 rectangle issue solve */
-  height: auto;
-  object-fit: cover;
-  border-radius: 16px;
-  background: #000;
-}
-
-/* Jab camera off ho (icon center & clean look) */
-video:not([srcObject]) {
-  background-color: #000;
-}
-
-/* Icon ko visually better dikhane ke liye */
-video {
-  display: block;
-}
-
-/* ================= FEEDBACK SECTION ================= */
-
-.chat-box textarea {
-  width: 100%;
-  resize: none;
-  padding: 8px;
-  border-radius: 6px;
-  border: none;
-  outline: none;
-  font-family: Arial, sans-serif;
-}
-
-.chat-box button#sendFeedbackBtn {
-  margin-top: 6px;
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  background: #22c55e;
-  color: #000;
-  font-weight: bold;
-}
-
-.chat-box button#sendFeedbackBtn:hover {
-  background: #16a34a;
-  color: #fff;
-}
-
-/* ================= SYSTEM MESSAGE LOOK ================= */
-
-#chatBox p {
-  margin: 4px 0;
-}
-
-#chatBox p b {
-  color: #22c55e;
-}
-
-/* ================= BUTTON COLOR VARIANTS ================= */
-
-#endCallBtn {
-  background: #ef4444;
-  color: white;
-}
-
-#endCallBtn:hover {
-  background: #dc2626;
-}
-
-#muteBtn,
-#cameraBtn,
-#shareScreenBtn {
-  background: #e5e7eb;
-  color: #000;
-}
-
-#muteBtn:hover,
-#cameraBtn:hover,
-#shareScreenBtn:hover {
-  background: #d1d5db;
-}
-
-/* ================= JOIN BOX BUTTONS ================= */
+/* ================= BUTTON COLORS ================= */
 
 #joinBtn {
   background: #22c55e;
@@ -277,4 +204,53 @@ video {
 
 #copyRoomBtn:hover {
   background: #2563eb;
+}
+
+#endCallBtn {
+  background: #ef4444;
+  color: #fff;
+}
+
+#endCallBtn:hover {
+  background: #dc2626;
+}
+
+#muteBtn,
+#cameraBtn,
+#shareScreenBtn {
+  background: #e5e7eb;
+  color: #000;
+}
+
+#muteBtn:hover,
+#cameraBtn:hover,
+#shareScreenBtn:hover {
+  background: #d1d5db;
+}
+
+/* ================= FEEDBACK ================= */
+
+#sendFeedbackBtn {
+  margin-top: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #22c55e;
+  color: #000;
+  font-weight: bold;
+}
+
+#sendFeedbackBtn:hover {
+  background: #16a34a;
+  color: #fff;
+}
+
+/* ================= MOBILE RESPONSIVE ================= */
+
+@media (max-width: 600px) {
+  .controls button {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
 }

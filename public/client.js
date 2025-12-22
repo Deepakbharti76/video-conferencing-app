@@ -1,4 +1,4 @@
-// client.js
+// ================= GLOBAL =================
 let currentRoom = null;
 let myName = "Guest";
 
@@ -20,7 +20,6 @@ const shareScreenBtn = document.getElementById("shareScreenBtn");
 const muteBtn = document.getElementById("muteBtn");
 const endCallBtn = document.getElementById("endCallBtn");
 
-// 👉 NEW buttons (HTML me hone chahiye)
 const cameraBtn = document.getElementById("cameraBtn");
 const clearChatBtn = document.getElementById("clearChatBtn");
 const copyRoomBtn = document.getElementById("copyRoomBtn");
@@ -28,23 +27,34 @@ const countEl = document.getElementById("count");
 
 let localStream = null;
 let peerConnections = {};
+let connectedPeers = new Set();
+
 let isMuted = false;
 let cameraOff = false;
+let usingFrontCamera = true;
 
+// ================= ICE (mobile friendly) =================
 const config = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:global.stun.twilio.com:3478" },
+  ],
 };
 
-// ---------------- MEDIA ----------------
+// ================= MEDIA =================
 async function startLocalStream() {
   localStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
+    video: { facingMode: "user" },
     audio: true,
   });
+
   localVideo.srcObject = localStream;
+  localVideo.muted = true; // local always muted
+  localVideo.playsInline = true;
+  await localVideo.play().catch(() => {});
 }
 
-// ---------------- JOIN ----------------
+// ================= JOIN =================
 joinBtn.onclick = () => {
   const roomId = roomInput.value.trim();
   const password = passwordInput.value;
@@ -58,32 +68,44 @@ joinBtn.onclick = () => {
   currentRoom = roomId;
   myName = username;
 
+  // ❌ camera yahan start nahi hoga
   socket.emit("join-room", { roomId, password, username });
 };
 
-// ---------------- SOCKET EVENTS ----------------
-socket.on("join-success", async () => {
+// ================= SOCKET =================
+socket.on("join-success", async ({ users, count }) => {
+  // camera start
   if (!localStream) {
     await startLocalStream();
     startActiveSpeakerDetection();
   }
+
+  // participants count
+  if (countEl) countEl.innerText = "Participants: " + count;
+
+  // 🔥 VERY IMPORTANT FIX
+  // new user must call existing users
+  if (Array.isArray(users)) {
+    users.forEach((u) => {
+      createOffer(u.id);
+    });
+  }
 });
 
-socket.on("join-error", (msg) => {
-  alert(msg);
-});
+socket.on("join-error", (msg) => alert(msg));
 
-// participants count
 socket.on("participants", (c) => {
   if (countEl) countEl.innerText = "Participants: " + c;
 });
 
-// new peer
+// ================= NEW PEER =================
 socket.on("new-peer", ({ id }) => {
+  if (connectedPeers.has(id)) return;
+  connectedPeers.add(id);
   createOffer(id);
 });
 
-// signaling
+// ================= SIGNAL =================
 socket.on("signal", async ({ from, data }) => {
   let pc = peerConnections[from];
   if (!pc) pc = createPeerConnection(from);
@@ -100,17 +122,20 @@ socket.on("signal", async ({ from, data }) => {
   }
 });
 
-// peer disconnected
+// ================= PEER DISCONNECT =================
 socket.on("peer-disconnected", (peerId) => {
+  connectedPeers.delete(peerId);
+
   if (peerConnections[peerId]) {
     peerConnections[peerId].close();
     delete peerConnections[peerId];
   }
+
   const video = document.getElementById(`video-${peerId}`);
   if (video) video.remove();
 });
 
-// ---------------- CHAT ----------------
+// ================= CHAT =================
 sendBtn.onclick = () => {
   const msg = chatInput.value.trim();
   if (!msg || !currentRoom) return;
@@ -125,7 +150,6 @@ sendBtn.onclick = () => {
   chatInput.value = "";
 };
 
-// Enter key support
 chatInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
@@ -141,15 +165,14 @@ function addMessage(sender, msg) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Clear chat
 if (clearChatBtn) {
-  clearChatBtn.onclick = () => {
-    chatBox.innerHTML = "";
-  };
+  clearChatBtn.onclick = () => (chatBox.innerHTML = "");
 }
 
-// ---------------- WEBRTC ----------------
+// ================= WEBRTC =================
 function createPeerConnection(peerId) {
+  if (peerConnections[peerId]) return peerConnections[peerId];
+
   const pc = new RTCPeerConnection(config);
   peerConnections[peerId] = pc;
 
@@ -162,9 +185,14 @@ function createPeerConnection(peerId) {
       video.id = `video-${peerId}`;
       video.autoplay = true;
       video.playsInline = true;
+      video.muted = false; // remote audio ON
       videoContainer.appendChild(video);
     }
-    video.srcObject = e.streams[0];
+
+    if (video.srcObject !== e.streams[0]) {
+      video.srcObject = e.streams[0];
+      video.play().catch(() => {});
+    }
   };
 
   pc.onicecandidate = (e) => {
@@ -186,36 +214,33 @@ async function createOffer(peerId) {
   socket.emit("signal", { to: peerId, data: pc.localDescription });
 }
 
-// ---------------- SCREEN SHARE ----------------
-shareScreenBtn.onclick = async () => {
-  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-  const track = stream.getVideoTracks()[0];
+// ================= CAMERA SWITCH (MOBILE) =================
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  Object.values(peerConnections).forEach((pc) => {
-    const sender = pc.getSenders().find((s) => s.track.kind === "video");
-    sender.replaceTrack(track);
-  });
+if (cameraBtn && isMobile) {
+  cameraBtn.onclick = async () => {
+    usingFrontCamera = !usingFrontCamera;
 
-  track.onended = () => {
-    const camTrack = localStream.getVideoTracks()[0];
+    const newStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: usingFrontCamera ? "user" : "environment" },
+      audio: true,
+    });
+
+    const newVideoTrack = newStream.getVideoTracks()[0];
+
     Object.values(peerConnections).forEach((pc) => {
       const sender = pc.getSenders().find((s) => s.track.kind === "video");
-      sender.replaceTrack(camTrack);
+      if (sender) sender.replaceTrack(newVideoTrack);
     });
-  };
-};
 
-// ---------------- CAMERA ON / OFF ----------------
-if (cameraBtn) {
-  cameraBtn.onclick = () => {
-    const track = localStream.getVideoTracks()[0];
-    cameraOff = !cameraOff;
-    track.enabled = !cameraOff;
-    cameraBtn.innerText = cameraOff ? "Camera On" : "Camera Off";
+    localStream.getTracks().forEach((t) => t.stop());
+    localStream = newStream;
+    localVideo.srcObject = newStream;
+    localVideo.play().catch(() => {});
   };
 }
 
-// ---------------- MUTE ----------------
+// ================= MIC =================
 muteBtn.onclick = () => {
   const track = localStream.getAudioTracks()[0];
   isMuted = !isMuted;
@@ -223,7 +248,7 @@ muteBtn.onclick = () => {
   muteBtn.innerText = isMuted ? "Mic Off" : "Mic On";
 };
 
-// ---------------- COPY ROOM ID ----------------
+// ================= COPY ROOM =================
 if (copyRoomBtn) {
   copyRoomBtn.onclick = () => {
     navigator.clipboard.writeText(currentRoom);
@@ -231,14 +256,14 @@ if (copyRoomBtn) {
   };
 }
 
-// ---------------- END CALL ----------------
+// ================= END CALL =================
 endCallBtn.onclick = () => {
   Object.values(peerConnections).forEach((pc) => pc.close());
   socket.disconnect();
   location.reload();
 };
 
-// ---------------- ACTIVE SPEAKER ----------------
+// ================= ACTIVE SPEAKER =================
 function startActiveSpeakerDetection() {
   const ctx = new AudioContext();
   const analyser = ctx.createAnalyser();
@@ -253,43 +278,10 @@ function startActiveSpeakerDetection() {
     localVideo.classList.toggle("active-speaker", vol > 25);
     requestAnimationFrame(detect);
   };
-
   detect();
 }
 
-// ================= FEEDBACK =================
-
-// HTML me ye elements hone chahiye:
-// <textarea id="feedbackText"></textarea>
-// <button id="sendFeedbackBtn">Send Feedback</button>
-
-const feedbackText = document.getElementById("feedbackText");
-const sendFeedbackBtn = document.getElementById("sendFeedbackBtn");
-
-if (sendFeedbackBtn) {
-  sendFeedbackBtn.onclick = () => {
-    const feedback = feedbackText.value.trim();
-
-    if (!feedback) {
-      alert("Please write feedback");
-      return;
-    }
-
-    socket.emit("send-feedback", {
-      roomId: currentRoom,
-      user: myName,
-      feedback,
-    });
-
-    feedbackText.value = "";
-    alert("Thanks for your feedback 🙏");
-  };
-}
-
-
-// ================= MOBILE CHECK =================
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
+// ================= MOBILE SCREEN SHARE DISABLE =================
 if (isMobile && shareScreenBtn) {
   shareScreenBtn.disabled = true;
   shareScreenBtn.innerText = "Screen Share (PC only)";

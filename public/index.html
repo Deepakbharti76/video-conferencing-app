@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Video Conferencing App</title>
 
-    <!-- External CSS only -->
+    <!-- ✅ MOBILE + CAMERA FIX -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ✅ CAMERA / MIC ALLOWED -->
+    <meta
+      http-equiv="Permissions-Policy"
+      content="camera=(self), microphone=(self), fullscreen=*"
+    />
+
+    <!-- External CSS -->
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -12,7 +21,7 @@
     <div class="container">
       <h2>Video Conferencing App</h2>
 
-      <!-- Join Section -->
+      <!-- ================= JOIN ================= -->
       <div class="join-box">
         <input id="room" value="demo-room" placeholder="Room name" />
         <input id="roomPassword" placeholder="Room password" />
@@ -24,22 +33,29 @@
         <p id="count">Participants: 1</p>
       </div>
 
-      <!-- Videos (GROUP CALL READY) -->
+      <!-- ================= VIDEO ================= -->
       <div class="video-container" id="videoContainer">
-        <video id="localVideo" autoplay muted playsinline></video>
+        <video
+          id="localVideo"
+          autoplay
+          muted
+          playsinline
+          webkit-playsinline
+        ></video>
       </div>
 
-      <!-- Controls -->
+      <!-- ================= CONTROLS ================= -->
       <div class="controls">
         <button id="shareScreenBtn">Share Screen</button>
-        <button id="cameraBtn">Camera Off</button>
+        <button id="cameraBtn">Camera Switch</button>
         <button id="muteBtn">Mute</button>
         <button id="endCallBtn">End Call</button>
       </div>
 
-      <!-- Chat -->
+      <!-- ================= CHAT ================= -->
       <div class="chat-box">
         <h3>Live Chat</h3>
+
         <div id="chatBox"></div>
 
         <div class="chat-input">
@@ -49,15 +65,13 @@
         </div>
       </div>
 
-      <!-- ================= FEEDBACK (NEW) ================= -->
-      <div class="chat-box" style="margin-top: 15px">
+      <!-- ================= FEEDBACK ================= -->
+      <div class="chat-box">
         <h3>Feedback</h3>
         <textarea
           id="feedbackText"
           placeholder="Write your feedback..."
-          style="width: 100%; height: 80px; border-radius: 6px; padding: 8px"
         ></textarea>
-        <br /><br />
         <button id="sendFeedbackBtn">Send Feedback</button>
       </div>
     </div>
@@ -65,5 +79,14 @@
     <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="client.js"></script>
+
+    <!-- UX: disable inputs after join -->
+    <script>
+      document.getElementById("joinBtn").addEventListener("click", () => {
+        room.disabled = true;
+        roomPassword.disabled = true;
+        username.disabled = true;
+      });
+    </script>
   </body>
 </html>
