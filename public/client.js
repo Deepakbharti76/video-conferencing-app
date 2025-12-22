@@ -59,11 +59,9 @@ tabButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const targetTab = button.getAttribute("data-tab");
 
-    // Remove active from all
     tabButtons.forEach((btn) => btn.classList.remove("active"));
     tabContents.forEach((content) => content.classList.remove("active"));
 
-    // Add active to clicked
     button.classList.add("active");
     document.getElementById(targetTab + "Tab").classList.add("active");
   });
@@ -90,7 +88,6 @@ async function startLocalStream() {
 
     await localVideo.play().catch(() => {});
 
-    // Start meeting timer
     if (!meetingStartTime) {
       meetingStartTime = Date.now();
       startMeetingTimer();
@@ -131,7 +128,6 @@ joinBtn.onclick = () => {
   currentRoom = roomId;
   myName = username;
 
-  // Disable inputs
   roomInput.disabled = true;
   passwordInput.disabled = true;
   usernameInput.disabled = true;
@@ -149,16 +145,13 @@ socket.on("connect", () => {
 socket.on("join-success", async ({ users, count }) => {
   console.log("Join success! Existing users:", users);
 
-  // Start camera
   if (!localStream) {
     await startLocalStream();
     startActiveSpeakerDetection();
   }
 
-  // Update UI
   updateParticipantCount(count);
 
-  // Add yourself to participants
   participants[mySocketId] = {
     id: mySocketId,
     name: myName,
@@ -167,7 +160,6 @@ socket.on("join-success", async ({ users, count }) => {
   };
   updateParticipantsList();
 
-  // Create connections with existing users
   if (users && users.length > 0) {
     users.forEach(({ id, name }) => {
       participants[id] = {
@@ -191,7 +183,6 @@ socket.on("join-success", async ({ users, count }) => {
 socket.on("join-error", (msg) => {
   alert(msg);
 
-  // Re-enable inputs
   roomInput.disabled = false;
   passwordInput.disabled = false;
   usernameInput.disabled = false;
@@ -477,43 +468,47 @@ if (cameraBtn) {
   };
 }
 
-muteBtn.onclick = () => {
-  if (!localStream) return;
+if (muteBtn) {
+  muteBtn.onclick = () => {
+    if (!localStream) return;
 
-  const track = localStream.getAudioTracks()[0];
-  isMuted = !isMuted;
-  track.enabled = !isMuted;
+    const track = localStream.getAudioTracks()[0];
+    isMuted = !isMuted;
+    track.enabled = !isMuted;
 
-  muteBtn.classList.toggle("active", isMuted);
+    muteBtn.classList.toggle("active", isMuted);
 
-  const localMicStatus = document.getElementById("localMicStatus");
-  if (localMicStatus) {
-    localMicStatus.classList.toggle("muted", isMuted);
-  }
+    const localMicStatus = document.getElementById("localMicStatus");
+    if (localMicStatus) {
+      localMicStatus.classList.toggle("muted", isMuted);
+    }
 
-  if (participants[mySocketId]) {
-    participants[mySocketId].muted = isMuted;
-    updateParticipantsList();
-  }
-};
+    if (participants[mySocketId]) {
+      participants[mySocketId].muted = isMuted;
+      updateParticipantsList();
+    }
+  };
+}
 
 // ================= END CALL =================
-endCallBtn.onclick = () => {
-  if (confirm("Are you sure you want to leave the meeting?")) {
-    Object.values(peerConnections).forEach((pc) => pc.close());
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
+if (endCallBtn) {
+  endCallBtn.onclick = () => {
+    if (confirm("Are you sure you want to leave the meeting?")) {
+      Object.values(peerConnections).forEach((pc) => pc.close());
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
+      }
+      if (screenStream) {
+        screenStream.getTracks().forEach((track) => track.stop());
+      }
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      socket.disconnect();
+      location.reload();
     }
-    if (screenStream) {
-      screenStream.getTracks().forEach((track) => track.stop());
-    }
-    if (timerInterval) {
-      clearInterval(timerInterval);
-    }
-    socket.disconnect();
-    location.reload();
-  }
-};
+  };
+}
 
 // ================= ACTIVE SPEAKER =================
 function startActiveSpeakerDetection() {
@@ -629,14 +624,6 @@ if (sendFeedbackBtn && feedbackText) {
     feedbackText.value = "";
     alert("Thank you! Your feedback has been submitted.");
   };
-}
-
-// ================= MOBILE CHECK =================
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-if (isMobile && shareScreenBtn) {
-  shareScreenBtn.disabled = true;
-  shareScreenBtn.title = "Screen Share (Desktop only)";
-  shareScreenBtn.style.opacity = "0.5";
 }
 
 console.log("VidChat Pro initialized!");
