@@ -2,15 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Video Conferencing App</title>
+    <title>Video Conferencing App - Professional</title>
 
-    <!-- ✅ MOBILE + CAMERA FIX -->
+    <!-- 🔥 MOBILE + CAMERA FIX -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- ✅ CAMERA / MIC ALLOWED -->
     <meta
       http-equiv="Permissions-Policy"
-      content="camera=(self), microphone=(self), fullscreen=*"
+      content="camera=(), microphone=(), fullscreen=*"
     />
 
     <!-- External CSS -->
@@ -18,75 +16,353 @@
   </head>
 
   <body>
-    <div class="container">
-      <h2>Video Conferencing App</h2>
-
-      <!-- ================= JOIN ================= -->
-      <div class="join-box">
-        <input id="room" value="demo-room" placeholder="Room name" />
-        <input id="roomPassword" placeholder="Room password" />
-        <input id="username" placeholder="Your name" />
-
-        <button id="joinBtn">Join Room</button>
-        <button id="copyRoomBtn">Copy Room ID</button>
-
-        <p id="count">Participants: 1</p>
-      </div>
-
-      <!-- ================= VIDEO ================= -->
-      <div class="video-container" id="videoContainer">
-        <video
-          id="localVideo"
-          autoplay
-          muted
-          playsinline
-          webkit-playsinline
-        ></video>
-      </div>
-
-      <!-- ================= CONTROLS ================= -->
-      <div class="controls">
-        <button id="shareScreenBtn">Share Screen</button>
-        <button id="cameraBtn">Camera Switch</button>
-        <button id="muteBtn">Mute</button>
-        <button id="endCallBtn">End Call</button>
-      </div>
-
-      <!-- ================= CHAT ================= -->
-      <div class="chat-box">
-        <h3>Live Chat</h3>
-
-        <div id="chatBox"></div>
-
-        <div class="chat-input">
-          <input id="chatInput" placeholder="Type message..." />
-          <button id="sendBtn">Send</button>
-          <button id="clearChatBtn">Clear Chat</button>
+    <!-- ================= TOP NAVBAR ================= -->
+    <div class="top-navbar">
+      <div class="navbar-left">
+        <div class="app-logo">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M23 7l-7 5 7 5V7z" fill="currentColor" />
+            <rect
+              x="1"
+              y="5"
+              width="15"
+              height="14"
+              rx="2"
+              fill="currentColor"
+            />
+          </svg>
+          <span>VidChat Pro</span>
         </div>
       </div>
 
-      <!-- ================= FEEDBACK ================= -->
-      <div class="chat-box">
-        <h3>Feedback</h3>
-        <textarea
-          id="feedbackText"
-          placeholder="Write your feedback..."
-        ></textarea>
-        <button id="sendFeedbackBtn">Send Feedback</button>
+      <div class="navbar-center">
+        <div id="meetingTitle">Team Meeting</div>
+        <div id="meetingTimer">00:00</div>
+      </div>
+
+      <div class="navbar-right">
+        <button id="settingsBtn" class="icon-btn" title="Settings">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 1v6m0 6v6m8.66-15.66l-4.24 4.24m-4.84 4.84l-4.24 4.24m16.48 0l-4.24-4.24m-4.84-4.84L3.34 3.34"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="main-container">
+      <!-- ================= SIDEBAR ================= -->
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-tabs">
+          <button class="tab-btn active" data-tab="join">Join</button>
+          <button class="tab-btn" data-tab="participants">Participants</button>
+          <button class="tab-btn" data-tab="chat">Chat</button>
+          <button class="tab-btn" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- JOIN TAB -->
+        <div class="tab-content active" id="joinTab">
+          <div class="join-form">
+            <h3>Join Meeting</h3>
+
+            <div class="form-group">
+              <label>Room Name</label>
+              <input
+                id="room"
+                value="demo-room"
+                placeholder="Enter room name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Password</label>
+              <input
+                id="roomPassword"
+                type="password"
+                placeholder="Enter password"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Your Name</label>
+              <input id="username" placeholder="Enter your name" />
+            </div>
+
+            <div class="form-actions">
+              <button id="joinBtn" class="primary-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <path d="M23 7l-7 5 7 5V7z" />
+                  <rect x="1" y="5" width="15" height="14" rx="2" />
+                </svg>
+                Join Room
+              </button>
+              <button id="copyRoomBtn" class="secondary-btn">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" />
+                  <path
+                    d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                  />
+                </svg>
+                Copy Room ID
+              </button>
+            </div>
+
+            <div class="participant-count">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
+              </svg>
+              <span id="count">Participants: 1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PARTICIPANTS TAB -->
+        <div class="tab-content" id="participantsTab">
+          <div class="participants-list">
+            <h3>Participants <span id="participantCount">1</span></h3>
+            <div id="participantsList">
+              <!-- Dynamic participants will be added here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- CHAT TAB -->
+        <div class="tab-content" id="chatTab">
+          <div class="chat-container">
+            <div class="chat-header">
+              <h3>Live Chat</h3>
+              <button id="clearChatBtn" class="icon-btn-small">Clear</button>
+            </div>
+
+            <div id="chatBox" class="chat-messages"></div>
+
+            <div class="chat-input-container">
+              <input id="chatInput" placeholder="Type a message..." />
+              <button id="sendBtn" class="send-btn">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div class="tab-content" id="settingsTab">
+          <div class="settings-container">
+            <h3>Settings</h3>
+
+            <div class="setting-group">
+              <h4>Video Quality</h4>
+              <select id="videoQuality" class="setting-select">
+                <option value="high">High (720p)</option>
+                <option value="medium" selected>Medium (480p)</option>
+                <option value="low">Low (360p)</option>
+              </select>
+            </div>
+
+            <div class="setting-group">
+              <h4>Audio Settings</h4>
+              <label class="checkbox-label">
+                <input type="checkbox" id="noiseSuppression" checked />
+                <span>Noise Suppression</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="echoCancellation" checked />
+                <span>Echo Cancellation</span>
+              </label>
+            </div>
+
+            <div class="setting-group">
+              <h4>Feedback</h4>
+              <textarea
+                id="feedbackText"
+                placeholder="Share your feedback..."
+              ></textarea>
+              <button id="sendFeedbackBtn" class="primary-btn">
+                Send Feedback
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= VIDEO AREA ================= -->
+      <div class="video-main">
+        <!-- Recording Indicator -->
+        <div
+          class="recording-indicator"
+          id="recordingIndicator"
+          style="display: none"
+        >
+          <div class="rec-dot"></div>
+          <span>Recording</span>
+          <span id="recordTime">00:00</span>
+        </div>
+
+        <!-- Video Grid -->
+        <div class="video-grid" id="videoContainer">
+          <div class="video-wrapper main-video">
+            <video
+              id="localVideo"
+              autoplay
+              muted
+              playsinline
+              webkit-playsinline
+            ></video>
+            <div class="video-overlay">
+              <div class="video-name">You</div>
+              <div class="video-status">
+                <span class="status-icon mic-icon" id="localMicStatus">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
+                    />
+                    <path
+                      d="M19 10v2a7 7 0 01-14 0v-2h2v2a5 5 0 0010 0v-2h2z"
+                    />
+                    <path d="M11 20h2v3h-2z" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Control Bar -->
+        <div class="control-bar">
+          <div class="control-left">
+            <span id="connectionStatus" class="connection-status">
+              <span class="status-dot"></span>
+              Connected
+            </span>
+          </div>
+
+          <div class="control-center">
+            <button id="muteBtn" class="control-btn" title="Mute/Unmute">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+                <path d="M19 10v2a7 7 0 01-14 0v-2h2v2a5 5 0 0010 0v-2h2z" />
+                <path d="M11 20h2v3h-2z" />
+              </svg>
+            </button>
+
+            <button id="cameraBtn" class="control-btn" title="Camera On/Off">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M23 7l-7 5 7 5V7z" />
+                <rect x="1" y="5" width="15" height="14" rx="2" />
+              </svg>
+            </button>
+
+            <button
+              id="shareScreenBtn"
+              class="control-btn"
+              title="Share Screen"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8m-4-4v4" />
+              </svg>
+            </button>
+
+            <button id="endCallBtn" class="control-btn danger" title="End Call">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.9l.82-1.2A2 2 0 0110.07 4h3.86a2 2 0 011.66.9l.82 1.2c.2.3.5.54.85.7a1 1 0 01.74.96V9a2 2 0 002 2 2 2 0 002-2V7a3 3 0 00-3-3h-.93a1 1 0 01-.83-.45l-.82-1.2A3 3 0 0013.93 1h-3.86a3 3 0 00-2.49 1.35l-.82 1.2A1 1 0 015.93 4H5a3 3 0 00-3 3v2a2 2 0 002 2 2 2 0 002-2z"
+                />
+                <path
+                  d="M2.5 16.5l3-3L12 20l6.5-6.5 3 3L12 26.5 2.5 16.5z"
+                  transform="translate(0, -8) rotate(135 12 12)"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="control-right">
+            <button
+              id="toggleSidebarBtn"
+              class="control-btn secondary"
+              title="Toggle Sidebar"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="client.js"></script>
-
-    <!-- UX: disable inputs after join -->
-    <script>
-      document.getElementById("joinBtn").addEventListener("click", () => {
-        room.disabled = true;
-        roomPassword.disabled = true;
-        username.disabled = true;
-      });
-    </script>
   </body>
 </html>

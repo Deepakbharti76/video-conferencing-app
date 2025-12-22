@@ -33,38 +33,52 @@ io.on("connection", (socket) => {
     // ❌ already joined protection
     if (socket.roomId) return;
 
-    // store user
+    // Store user info
     users[socket.id] = { username, roomId };
     socket.roomId = roomId;
 
-    socket.join(roomId);
-
-    // 👥 participants count
-    roomCounts[roomId] = (roomCounts[roomId] || 0) + 1;
-
-    // ✅ GET EXISTING USERS OF SAME ROOM ONLY
+    // Get existing users in this room BEFORE joining
     const existingUsers = [];
-    for (const [id, info] of Object.entries(users)) {
-      if (info.roomId === roomId && id !== socket.id) {
-        existingUsers.push({ id, name: info.username });
-      }
+    const roomSockets = io.sockets.adapter.rooms.get(roomId);
+
+    if (roomSockets) {
+      roomSockets.forEach((socketId) => {
+        if (socketId !== socket.id && users[socketId]) {
+          existingUsers.push({
+            id: socketId,
+            name: users[socketId].username,
+          });
+        }
+      });
     }
 
-    // 🔥 send join success with room users
+    // Now join the room
+    socket.join(roomId);
+
+    // Update count
+    roomCounts[roomId] = (roomCounts[roomId] || 0) + 1;
+
+    console.log(
+      `${username} joined room ${roomId}. Existing users:`,
+      existingUsers.length
+    );
+
+    // ✅ Send join success with list of existing users
     socket.emit("join-success", {
       users: existingUsers,
       count: roomCounts[roomId],
     });
 
+    // Update everyone's participant count
     io.to(roomId).emit("participants", roomCounts[roomId]);
 
-    // 📢 system join message
+    // 📢 system join message to others
     socket.to(roomId).emit("chat-message", {
       sender: "System",
       message: `${username} joined the room`,
     });
 
-    // 🔔 notify existing peers (they will wait for offer)
+    // 🔔 notify OTHER users that NEW peer joined
     socket.to(roomId).emit("new-peer", {
       id: socket.id,
       name: username,
@@ -79,7 +93,14 @@ io.on("connection", (socket) => {
 
   // ================= SIGNALING =================
   socket.on("signal", ({ to, data }) => {
-    if (!to || !data) return;
+    if (!to || !data) {
+      console.log("Invalid signal data");
+      return;
+    }
+
+    const signalType = data.type || "candidate";
+    console.log(`Relaying ${signalType} from ${socket.id} to ${to}`);
+
     io.to(to).emit("signal", {
       from: socket.id,
       data,
@@ -110,20 +131,26 @@ io.on("connection", (socket) => {
 
   // ================= DISCONNECT =================
   socket.on("disconnect", () => {
-    const info = users[socket.id];
-    if (!info) return;
+    const userInfo = users[socket.id];
 
-    const { roomId, username } = info;
+    if (!userInfo) return;
 
-    roomCounts[roomId] = Math.max((roomCounts[roomId] || 1) - 1, 0);
-    io.to(roomId).emit("participants", roomCounts[roomId]);
+    const { username, roomId } = userInfo;
 
-    socket.to(roomId).emit("chat-message", {
-      sender: "System",
-      message: `${username} left the room`,
-    });
+    if (roomId) {
+      roomCounts[roomId] = Math.max((roomCounts[roomId] || 1) - 1, 0);
 
-    socket.to(roomId).emit("peer-disconnected", socket.id);
+      console.log(`${username} left room ${roomId}`);
+
+      io.to(roomId).emit("participants", roomCounts[roomId]);
+
+      socket.to(roomId).emit("chat-message", {
+        sender: "System",
+        message: `${username} left the room`,
+      });
+
+      socket.to(roomId).emit("peer-disconnected", socket.id);
+    }
 
     delete users[socket.id];
   });
