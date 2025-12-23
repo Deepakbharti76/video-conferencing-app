@@ -268,99 +268,77 @@
             </div>
           </div>
         </div>
-
-        <!-- Control Bar -->
-        <div class="control-bar">
-          <div class="control-left">
-            <span id="connectionStatus" class="connection-status">
-              <span class="status-dot"></span>
-              Connected
-            </span>
-          </div>
-
-          <div class="control-center">
-            <button id="muteBtn" class="control-btn" title="Mute/Unmute">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
-                <path d="M19 10v2a7 7 0 01-14 0v-2h2v2a5 5 0 0010 0v-2h2z" />
-                <path d="M11 20h2v3h-2z" />
-              </svg>
-            </button>
-
-            <button id="cameraBtn" class="control-btn" title="Camera On/Off">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M23 7l-7 5 7 5V7z" />
-                <rect x="1" y="5" width="15" height="14" rx="2" />
-              </svg>
-            </button>
-
-            <button
-              id="shareScreenBtn"
-              class="control-btn"
-              title="Share Screen"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M8 21h8m-4-4v4" />
-              </svg>
-            </button>
-
-            <button id="endCallBtn" class="control-btn danger" title="End Call">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.9l.82-1.2A2 2 0 0110.07 4h3.86a2 2 0 011.66.9l.82 1.2c.2.3.5.54.85.7a1 1 0 01.74.96V9a2 2 0 002 2 2 2 0 002-2V7a3 3 0 00-3-3h-.93a1 1 0 01-.83-.45l-.82-1.2A3 3 0 0013.93 1h-3.86a3 3 0 00-2.49 1.35l-.82 1.2A1 1 0 015.93 4H5a3 3 0 00-3 3v2a2 2 0 002 2 2 2 0 002-2z"
-                />
-                <path
-                  d="M2.5 16.5l3-3L12 20l6.5-6.5 3 3L12 26.5 2.5 16.5z"
-                  transform="translate(0, -8) rotate(135 12 12)"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div class="control-right">
-            <button
-              id="toggleSidebarBtn"
-              class="control-btn secondary"
-              title="Toggle Sidebar"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <line x1="9" y1="3" x2="9" y2="21" />
-              </svg>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
+    <!-- End of video-main -->
 
+    <!-- Control Bar - Fixed at bottom -->
+    <div class="control-bar" id="controlBar">
+      <div class="control-left">
+        <span id="connectionStatus" class="connection-status">
+          <span class="status-dot"></span>
+          Connected
+        </span>
+      </div>
+
+      <div class="control-center">
+        <button id="muteBtn" class="control-btn" title="Mute">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
+            <path d="M19 10v2a7 7 0 01-14 0v-2h2v2a5 5 0 0010 0v-2h2z" />
+          </svg>
+        </button>
+
+        <button id="cameraBtn" class="control-btn" title="Camera">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M23 7l-7 5 7 5V7z" />
+            <rect x="1" y="5" width="15" height="14" rx="2" />
+          </svg>
+        </button>
+
+        <button id="shareScreenBtn" class="control-btn" title="Share">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <path d="M8 21h8m-4-4v4" />
+          </svg>
+        </button>
+
+        <button id="endCallBtn" class="control-btn danger" title="End">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"
+              transform="rotate(135 12 12)"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="control-right">
+        <button
+          id="toggleSidebarBtn"
+          class="control-btn secondary"
+          title="Menu"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
     <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="client.js"></script>
