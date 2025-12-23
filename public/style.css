@@ -748,28 +748,46 @@ body {
   }
 
   .control-bar {
-    padding: 12px;
+    padding: 10px 6px;
+    gap: 6px;
   }
 
   .control-left,
   .control-right {
-    gap: 6px;
-    min-width: 0;
+    flex: 0 0 auto;
+    gap: 4px;
   }
 
-  .connection-status {
-    font-size: 11px;
+  /* Hide connection text on mobile, show only dot */
+  .connection-status span:not(.status-dot) {
+    display: none;
   }
 
   .control-btn {
-    width: 45px;
-    height: 45px;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+  }
+
+  .control-btn.secondary {
+    width: 38px;
+    height: 38px;
   }
 
   .control-center {
-    gap: 8px;
-    flex-wrap: wrap;
+    flex: 1;
+    display: flex;
+    gap: 6px;
     justify-content: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .control-center::-webkit-scrollbar {
+    display: none;
   }
 
   .video-grid {
@@ -795,24 +813,36 @@ body {
 /* Extra small mobile */
 @media (max-width: 480px) {
   .control-bar {
-    padding: 8px;
+    padding: 8px 4px;
   }
 
   .control-btn {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .control-btn.secondary {
+    width: 36px;
+    height: 36px;
   }
 
   .control-center {
-    gap: 6px;
+    gap: 5px;
   }
 
-  .control-left .connection-status {
-    display: none;
+  .control-left,
+  .control-right {
+    gap: 3px;
   }
 
   .sidebar {
     max-width: 280px;
+  }
+
+  /* Further reduce video grid padding */
+  .video-grid {
+    padding: 8px;
+    gap: 10px;
   }
 }
 
