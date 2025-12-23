@@ -743,13 +743,23 @@ body {
     transform: translateX(-100%);
   }
 
+  /* Add padding to prevent content under control bar */
+  .video-main {
+    padding-bottom: 80px;
+  }
+
   .navbar-center {
     display: none;
   }
 
   .control-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 10px 6px;
     gap: 6px;
+    z-index: 1000;
   }
 
   .control-left,
@@ -767,6 +777,9 @@ body {
     width: 46px;
     height: 46px;
     flex-shrink: 0;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
   }
 
   .control-btn.secondary {
@@ -776,7 +789,7 @@ body {
 
   .control-center {
     flex: 1;
-    display: flex;
+    display: flex !important;
     gap: 6px;
     justify-content: center;
     flex-wrap: nowrap;
@@ -813,12 +826,18 @@ body {
 /* Extra small mobile */
 @media (max-width: 480px) {
   .control-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 8px 4px;
+    z-index: 1000;
   }
 
   .control-btn {
     width: 42px;
     height: 42px;
+    display: flex !important;
   }
 
   .control-btn.secondary {
@@ -828,6 +847,7 @@ body {
 
   .control-center {
     gap: 5px;
+    display: flex !important;
   }
 
   .control-left,
@@ -843,6 +863,11 @@ body {
   .video-grid {
     padding: 8px;
     gap: 10px;
+  }
+
+  /* Add more padding for smaller screens */
+  .video-main {
+    padding-bottom: 70px;
   }
 }
 
