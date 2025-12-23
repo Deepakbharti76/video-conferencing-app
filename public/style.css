@@ -689,6 +689,17 @@ body {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  position: relative;
+}
+
+.control-btn::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  transition: all 0.2s;
 }
 
 .control-btn:hover {
@@ -696,8 +707,17 @@ body {
   transform: scale(1.1);
 }
 
+.control-btn:hover::after {
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
 .control-btn.active {
   background: #667eea;
+}
+
+.control-btn.active::after {
+  border-color: #667eea;
 }
 
 .control-btn.danger {
@@ -715,6 +735,28 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* Floating sidebar toggle for mobile */
+.floating-sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  z-index: 99;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.floating-sidebar-toggle:active {
+  transform: scale(0.9);
+}
+
 /* ================= RESPONSIVE ================= */
 @media (max-width: 1024px) {
   .sidebar {
@@ -729,11 +771,12 @@ body {
 }
 
 @media (max-width: 768px) {
+  /* Sidebar */
   .sidebar {
     position: fixed;
     left: 0;
     top: 60px;
-    bottom: 0;
+    bottom: 80px;
     z-index: 100;
     width: 100%;
     max-width: 320px;
@@ -743,131 +786,211 @@ body {
     transform: translateX(-100%);
   }
 
-  /* Add padding to prevent content under control bar */
+  /* Video Main Area */
   .video-main {
-    padding-bottom: 80px;
+    height: calc(100vh - 60px);
+    padding-bottom: 0;
   }
 
+  .video-grid {
+    height: calc(100% - 80px);
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+    overflow-y: auto;
+  }
+
+  /* Hide navbar center */
   .navbar-center {
     display: none;
   }
 
+  /* CONTROL BAR - CRITICAL FIX */
   .control-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 10px 6px;
-    gap: 6px;
-    z-index: 1000;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 70px !important;
+    padding: 12px 8px !important;
+    gap: 8px !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: rgba(0, 0, 0, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    border-top: 2px solid rgba(102, 126, 234, 0.5) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
   }
 
   .control-left,
   .control-right {
-    flex: 0 0 auto;
-    gap: 4px;
-  }
-
-  /* Hide connection text on mobile, show only dot */
-  .connection-status span:not(.status-dot) {
-    display: none;
-  }
-
-  .control-btn {
-    width: 46px;
-    height: 46px;
-    flex-shrink: 0;
     display: flex !important;
-    align-items: center;
-    justify-content: center;
+    flex: 0 0 auto !important;
+    gap: 6px !important;
+  }
+
+  /* Hide connection text, show only dot */
+  .connection-status {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .connection-status span:not(.status-dot) {
+    display: none !important;
+  }
+
+  .status-dot {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  /* Control Buttons */
+  .control-btn {
+    width: 52px !important;
+    height: 52px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.2s !important;
+  }
+
+  .control-btn:active {
+    transform: scale(0.95) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
   }
 
   .control-btn.secondary {
-    width: 38px;
-    height: 38px;
+    width: 44px !important;
+    height: 44px !important;
   }
 
+  .control-btn.danger {
+    background: rgba(239, 68, 68, 0.9) !important;
+    border-color: rgba(239, 68, 68, 1) !important;
+  }
+
+  .control-btn.active {
+    background: rgba(102, 126, 234, 0.9) !important;
+    border-color: rgba(102, 126, 234, 1) !important;
+  }
+
+  /* Control Center */
   .control-center {
-    flex: 1;
+    flex: 1 !important;
     display: flex !important;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: nowrap;
+    gap: 8px !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding: 0 4px !important;
+  }
+
+  /* Hide scrollbar */
+  .control-center::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Button SVG */
+  .control-btn svg {
+    width: 22px !important;
+    height: 22px !important;
+    pointer-events: none !important;
+  }
+
+  /* Top navbar */
+  .top-navbar {
+    padding: 12px 16px;
+    height: 60px;
+  }
+
+  .app-logo span {
+    display: none;
+  }
+
+  /* Sidebar tabs */
+  .sidebar-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
 
-  /* Hide scrollbar but keep scroll functionality */
-  .control-center::-webkit-scrollbar {
+  .sidebar-tabs::-webkit-scrollbar {
     display: none;
   }
 
-  .video-grid {
-    grid-template-columns: 1fr;
-    padding: 12px;
-    gap: 12px;
+  .tab-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 12px;
   }
 
-  .control-btn svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .top-navbar {
-    padding: 12px 16px;
-  }
-
-  .app-logo span {
-    display: none;
+  /* Video wrapper adjustments */
+  .video-wrapper {
+    aspect-ratio: 16 / 9;
+    min-height: 200px;
   }
 }
 
 /* Extra small mobile */
 @media (max-width: 480px) {
   .control-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 8px 4px;
-    z-index: 1000;
+    min-height: 65px !important;
+    padding: 10px 6px !important;
   }
 
   .control-btn {
-    width: 42px;
-    height: 42px;
-    display: flex !important;
+    width: 48px !important;
+    height: 48px !important;
   }
 
   .control-btn.secondary {
-    width: 36px;
-    height: 36px;
+    width: 40px !important;
+    height: 40px !important;
   }
 
   .control-center {
-    gap: 5px;
-    display: flex !important;
+    gap: 6px !important;
   }
 
   .control-left,
   .control-right {
-    gap: 3px;
+    gap: 4px !important;
   }
 
   .sidebar {
     max-width: 280px;
   }
 
-  /* Further reduce video grid padding */
   .video-grid {
     padding: 8px;
     gap: 10px;
+    height: calc(100% - 65px);
   }
 
-  /* Add more padding for smaller screens */
-  .video-main {
-    padding-bottom: 70px;
+  .control-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .video-wrapper {
+    min-height: 180px;
   }
 }
 
