@@ -1008,3 +1008,34 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* ============ MOBILE / DESKTOP VISIBILITY FIX ============ */
+
+.controls,
+.chat-box,
+.chat-input,
+#chatBox,
+#sendBtn,
+#clearChatBtn,
+#muteBtn,
+#cameraBtn,
+#shareScreenBtn,
+#endCallBtn,
+#copyRoomBtn,
+#joinBtn,
+#count {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.chat-box {
+  display: block !important;
+}
+
+
+
+video {
+  max-width: 100%;
+  height: auto;
+}
