@@ -2,9 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>VidChat Pro - Video Conferencing</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), fullscreen=*" />
+    <title>VidChat Pro Ultra - Professional Video Conferencing</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      http-equiv="Permissions-Policy"
+      content="camera=(), microphone=(), fullscreen=*"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -15,9 +21,16 @@
         <div class="app-logo">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
             <path d="M23 7l-7 5 7 5V7z" fill="currentColor" />
-            <rect x="1" y="5" width="15" height="14" rx="2" fill="currentColor" />
+            <rect
+              x="1"
+              y="5"
+              width="15"
+              height="14"
+              rx="2"
+              fill="currentColor"
+            />
           </svg>
-          <span>VidChat Pro</span>
+          <span>VidChat Pro Ultra</span>
         </div>
       </div>
       <div class="navbar-center">
@@ -26,9 +39,17 @@
       </div>
       <div class="navbar-right">
         <button id="settingsBtn" class="icon-btn" title="Settings">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <circle cx="12" cy="12" r="3" />
-            <path d="M12 1v6m0 6v6m8.66-15.66l-4.24 4.24m-4.84 4.84l-4.24 4.24m16.48 0l-4.24-4.24m-4.84-4.84L3.34 3.34" />
+            <path
+              d="M12 1v6m0 6v6m8.66-15.66l-4.24 4.24m-4.84 4.84l-4.24 4.24m16.48 0l-4.24-4.24m-4.84-4.84L3.34 3.34"
+            />
           </svg>
         </button>
       </div>
@@ -39,7 +60,7 @@
       <div class="sidebar" id="sidebar">
         <div class="sidebar-tabs">
           <button class="tab-btn active" data-tab="join">Join</button>
-          <button class="tab-btn" data-tab="participants">Participants</button>
+          <button class="tab-btn" data-tab="participants">People</button>
           <button class="tab-btn" data-tab="chat">Chat</button>
           <button class="tab-btn" data-tab="settings">Settings</button>
         </div>
@@ -50,11 +71,19 @@
             <h3>Join Meeting</h3>
             <div class="form-group">
               <label>Room Name</label>
-              <input id="room" value="demo-room" placeholder="Enter room name" />
+              <input
+                id="room"
+                value="demo-room"
+                placeholder="Enter room name"
+              />
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input id="roomPassword" type="password" placeholder="Enter password" />
+              <input
+                id="roomPassword"
+                type="password"
+                placeholder="Enter password (1234)"
+              />
             </div>
             <div class="form-group">
               <label>Your Name</label>
@@ -62,22 +91,42 @@
             </div>
             <div class="form-actions">
               <button id="joinBtn" class="primary-btn">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <path d="M23 7l-7 5 7 5V7z" />
                   <rect x="1" y="5" width="15" height="14" rx="2" />
                 </svg>
                 Join Room
               </button>
               <button id="copyRoomBtn" class="secondary-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <rect x="9" y="9" width="13" height="13" rx="2" />
-                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                  <path
+                    d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                  />
                 </svg>
                 Copy Room ID
               </button>
             </div>
             <div class="participant-count">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
@@ -106,7 +155,13 @@
             <div class="chat-input-container">
               <input id="chatInput" placeholder="Type a message..." />
               <button id="sendBtn" class="send-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
                   <line x1="22" y1="2" x2="11" y2="13" />
                   <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
@@ -122,8 +177,9 @@
             <div class="setting-group">
               <h4>Video Quality</h4>
               <select id="videoQuality" class="setting-select">
-                <option value="high">High (720p)</option>
-                <option value="medium" selected>Medium (480p)</option>
+                <option value="hd">HD (1280x720)</option>
+                <option value="high" selected>High (720p)</option>
+                <option value="medium">Medium (480p)</option>
                 <option value="low">Low (360p)</option>
               </select>
             </div>
@@ -137,11 +193,31 @@
                 <input type="checkbox" id="echoCancellation" checked />
                 <span>Echo Cancellation</span>
               </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="autoGainControl" checked />
+                <span>Auto Gain Control</span>
+              </label>
+            </div>
+            <div class="setting-group">
+              <h4>Notifications</h4>
+              <label class="checkbox-label">
+                <input type="checkbox" id="desktopNotifications" checked />
+                <span>Desktop Notifications</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="chatNotifications" checked />
+                <span>Chat Notifications</span>
+              </label>
             </div>
             <div class="setting-group">
               <h4>Feedback</h4>
-              <textarea id="feedbackText" placeholder="Share your feedback..."></textarea>
-              <button id="sendFeedbackBtn" class="primary-btn">Send Feedback</button>
+              <textarea
+                id="feedbackText"
+                placeholder="Share your feedback..."
+              ></textarea>
+              <button id="sendFeedbackBtn" class="primary-btn">
+                Send Feedback
+              </button>
             </div>
           </div>
         </div>
@@ -149,22 +225,43 @@
 
       <!-- VIDEO AREA -->
       <div class="video-main">
-        <div class="recording-indicator" id="recordingIndicator" style="display: none">
+        <!-- Recording Indicator -->
+        <div
+          class="recording-indicator"
+          id="recordingIndicator"
+          style="display: none"
+        >
           <div class="rec-dot"></div>
           <span>Recording</span>
           <span id="recordTime">00:00</span>
         </div>
 
+        <!-- Video Grid -->
         <div class="video-grid" id="videoContainer">
           <div class="video-wrapper main-video">
-            <video id="localVideo" autoplay muted playsinline webkit-playsinline></video>
+            <video
+              id="localVideo"
+              autoplay
+              muted
+              playsinline
+              webkit-playsinline
+            ></video>
             <div class="video-overlay">
               <div class="video-name">You</div>
               <div class="video-status">
                 <span class="status-icon mic-icon" id="localMicStatus">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
-                    <path d="M19 10v2a7 7 0 01-14 0v-2h2v2a5 5 0 0010 0v-2h2z" />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
+                    />
+                    <path
+                      d="M19 10v2a7 7 0 01-14 0v-2h2v2a5 5 0 0010 0v-2h2z"
+                    />
                     <path d="M11 20h2v3h-2z" />
                   </svg>
                 </span>
@@ -178,44 +275,189 @@
           <div class="control-left">
             <span id="connectionStatus" class="connection-status">
               <span class="status-dot"></span>
-              Connected
+              <span class="status-text">Connected</span>
             </span>
           </div>
 
           <div class="control-center">
-            <button id="muteBtn" class="control-btn" title="Mute/Unmute">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <!-- Essential Controls -->
+            <button id="muteBtn" class="control-btn" title="Mute/Unmute (M)">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" />
                 <path d="M19 10v2a7 7 0 01-14 0v-2h2v2a5 5 0 0010 0v-2h2z" />
                 <path d="M11 20h2v3h-2z" />
               </svg>
             </button>
 
-            <button id="cameraBtn" class="control-btn" title="Camera On/Off">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <button
+              id="cameraBtn"
+              class="control-btn"
+              title="Camera On/Off (V)"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M23 7l-7 5 7 5V7z" />
                 <rect x="1" y="5" width="15" height="14" rx="2" />
               </svg>
             </button>
 
-            <button id="shareScreenBtn" class="control-btn" title="Share Screen">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <!-- Advanced Features -->
+            <button
+              id="shareScreenBtn"
+              class="control-btn"
+              title="Share Screen (S)"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <rect x="2" y="3" width="20" height="14" rx="2" />
                 <path d="M8 21h8m-4-4v4" />
               </svg>
             </button>
 
+            <button
+              id="recordBtn"
+              class="control-btn"
+              title="Record Meeting (R)"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <circle cx="12" cy="12" r="8" />
+              </svg>
+            </button>
+
+            <button
+              id="blurBtn"
+              class="control-btn"
+              title="Blur Background (B)"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                />
+              </svg>
+            </button>
+
+            <button id="reactionsBtn" class="control-btn" title="Reactions (E)">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
+              </svg>
+            </button>
+
+            <button
+              id="raiseHandBtn"
+              class="control-btn"
+              title="Raise Hand (H)"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M14 2v12.5c0 .83-.67 1.5-1.5 1.5S11 15.33 11 14.5V2h3zM9 4v10.5c0 .83-.67 1.5-1.5 1.5S6 15.33 6 14.5V4h3zm8 0v10.5c0 .83-.67 1.5-1.5 1.5s-1.5-.67-1.5-1.5V4h3zm-4 12c-3.31 0-6 2.69-6 6h2c0-2.21 1.79-4 4-4s4 1.79 4 4h2c0-3.31-2.69-6-6-6z"
+                />
+              </svg>
+            </button>
+
+            <!-- View Mode -->
+            <button
+              id="galleryBtn"
+              class="control-btn active"
+              title="Gallery View (G)"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+              </svg>
+            </button>
+
+            <button id="speakerBtn" class="control-btn" title="Speaker View">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="7" width="20" height="10" rx="2" />
+              </svg>
+            </button>
+
+            <!-- End Call -->
             <button id="endCallBtn" class="control-btn danger" title="End Call">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.9l.82-1.2A2 2 0 0110.07 4h3.86a2 2 0 011.66.9l.82 1.2c.2.3.5.54.85.7a1 1 0 01.74.96V9a2 2 0 002 2 2 2 0 002-2V7a3 3 0 00-3-3h-.93a1 1 0 01-.83-.45l-.82-1.2A3 3 0 0013.93 1h-3.86a3 3 0 00-2.49 1.35l-.82 1.2A1 1 0 015.93 4H5a3 3 0 00-3 3v2a2 2 0 002 2 2 2 0 002-2z" />
-                <path d="M2.5 16.5l3-3L12 20l6.5-6.5 3 3L12 26.5 2.5 16.5z" transform="translate(0, -8) rotate(135 12 12)" />
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"
+                />
               </svg>
             </button>
           </div>
 
           <div class="control-right">
-            <button id="toggleSidebarBtn" class="control-btn secondary" title="Toggle Sidebar">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <button
+              id="toggleSidebarBtn"
+              class="control-btn secondary"
+              title="Toggle Sidebar"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <line x1="9" y1="3" x2="9" y2="21" />
               </svg>

@@ -4,6 +4,7 @@ const ROOM_PASSWORD = "7644";
 const users = {}; // socket.id -> { username, roomId }
 const roomCounts = {}; // roomId -> participants count
 const feedbacks = []; // feedbacks (memory)
+const roomHistory = {}; // room analytics
 
 // ================= SETUP =================
 const express = require("express");
@@ -12,9 +13,27 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 app.use(express.static("public"));
+app.use(express.json());
+
+// ================= ANALYTICS ENDPOINT =================
+app.get("/api/analytics/:roomId", (req, res) => {
+  const { roomId } = req.params;
+  const analytics = roomHistory[roomId] || {
+    totalParticipants: 0,
+    peakParticipants: 0,
+    duration: 0,
+    messages: 0
+  };
+  res.json(analytics);
+});
 
 // ================= SOCKET =================
 io.on("connection", (socket) => {
@@ -24,20 +43,18 @@ io.on("connection", (socket) => {
   socket.on("join-room", ({ roomId, password, username }) => {
     if (!roomId || !username) return;
 
-    // 🔐 password check
     if (password !== ROOM_PASSWORD) {
       socket.emit("join-error", "Wrong password");
       return;
     }
 
-    // ❌ already joined protection
     if (socket.roomId) return;
 
     // Store user info
-    users[socket.id] = { username, roomId };
+    users[socket.id] = { username, roomId, joinedAt: Date.now() };
     socket.roomId = roomId;
 
-    // Get existing users in this room BEFORE joining
+    // Get existing users
     const existingUsers = [];
     const roomSockets = io.sockets.adapter.rooms.get(roomId);
 
@@ -52,33 +69,41 @@ io.on("connection", (socket) => {
       });
     }
 
-    // Now join the room
     socket.join(roomId);
 
     // Update count
     roomCounts[roomId] = (roomCounts[roomId] || 0) + 1;
 
-    console.log(
-      `${username} joined room ${roomId}. Existing users:`,
-      existingUsers.length
-    );
+    // Track analytics
+    if (!roomHistory[roomId]) {
+      roomHistory[roomId] = {
+        totalParticipants: 0,
+        peakParticipants: 0,
+        duration: 0,
+        messages: 0,
+        startTime: Date.now()
+      };
+    }
+    
+    roomHistory[roomId].totalParticipants++;
+    if (roomCounts[roomId] > roomHistory[roomId].peakParticipants) {
+      roomHistory[roomId].peakParticipants = roomCounts[roomId];
+    }
 
-    // ✅ Send join success with list of existing users
+    console.log(`${username} joined room ${roomId}. Count: ${roomCounts[roomId]}`);
+
     socket.emit("join-success", {
       users: existingUsers,
       count: roomCounts[roomId],
     });
 
-    // Update everyone's participant count
     io.to(roomId).emit("participants", roomCounts[roomId]);
 
-    // 📢 system join message to others
     socket.to(roomId).emit("chat-message", {
       sender: "System",
       message: `${username} joined the room`,
     });
 
-    // 🔔 notify OTHER users that NEW peer joined
     socket.to(roomId).emit("new-peer", {
       id: socket.id,
       name: username,
@@ -88,6 +113,12 @@ io.on("connection", (socket) => {
   // ================= CHAT =================
   socket.on("chat-message", ({ roomId, sender, message }) => {
     if (!roomId || !message) return;
+    
+    // Track message count
+    if (roomHistory[roomId]) {
+      roomHistory[roomId].messages++;
+    }
+    
     socket.to(roomId).emit("chat-message", { sender, message });
   });
 
@@ -105,6 +136,28 @@ io.on("connection", (socket) => {
       from: socket.id,
       data,
     });
+  });
+
+  // ================= REACTIONS =================
+  socket.on("send-reaction", ({ roomId, userId, emoji }) => {
+    if (!roomId || !emoji) return;
+    
+    socket.to(roomId).emit("reaction", { userId, emoji });
+  });
+
+  // ================= RAISE HAND =================
+  socket.on("raise-hand", ({ roomId, userId, raised }) => {
+    if (!roomId) return;
+    
+    io.to(roomId).emit("hand-raised", { userId, raised });
+    
+    if (raised) {
+      const username = users[socket.id]?.username || "Someone";
+      socket.to(roomId).emit("chat-message", {
+        sender: "System",
+        message: `${username} raised their hand ✋`,
+      });
+    }
   });
 
   // ================= FEEDBACK =================
@@ -135,12 +188,18 @@ io.on("connection", (socket) => {
 
     if (!userInfo) return;
 
-    const { username, roomId } = userInfo;
+    const { username, roomId, joinedAt } = userInfo;
 
     if (roomId) {
       roomCounts[roomId] = Math.max((roomCounts[roomId] || 1) - 1, 0);
 
-      console.log(`${username} left room ${roomId}`);
+      // Update session duration
+      if (roomHistory[roomId]) {
+        const sessionDuration = Date.now() - joinedAt;
+        roomHistory[roomId].duration += sessionDuration;
+      }
+
+      console.log(`${username} left room ${roomId}. Count: ${roomCounts[roomId]}`);
 
       io.to(roomId).emit("participants", roomCounts[roomId]);
 
@@ -159,5 +218,21 @@ io.on("connection", (socket) => {
 // ================= START SERVER =================
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`
+╔══════════════════════════════════════════╗
+║  VidChat Pro Ultra - Server Running      ║
+║  http://localhost:${PORT}                   ║
+║                                          ║
+║  Features:                               ║
+║  ✓ HD Video Quality                      ║
+║  ✓ Screen Recording                      ║
+║  ✓ Background Blur                       ║
+║  ✓ Reactions & Emojis                    ║
+║  ✓ Raise Hand                            ║
+║  ✓ Gallery/Speaker View                  ║
+║  ✓ Advanced Analytics                    ║
+║                                          ║
+║  Default Password: 7644                  ║
+╚══════════════════════════════════════════╝
+  `);
 });
